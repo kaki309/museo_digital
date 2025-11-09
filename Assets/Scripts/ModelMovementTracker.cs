@@ -16,14 +16,6 @@ public class ModelMovementTracker : MonoBehaviour
     [Header("Split Settings")]
     [Tooltip("Tiempo en segundos antes de cambiar de escena después del split")]
     public float timeBeforeSceneChange = 2f;
-    
-    [Tooltip("Fuerza con la que se separan las partes del modelo")]
-    public float splitForce = 5f;
-    
-    [Tooltip("Distancia de separación entre las partes")]
-    public float splitDistance = 3f;
-
-    [Header("Scene Settings")]
     [Tooltip("Nombre de la escena a la que cambiar después del split")]
     public string nextSceneName = "interfaz";
 
@@ -156,7 +148,13 @@ public class ModelMovementTracker : MonoBehaviour
 
     private void SplitModel()
     {
-        // TODO: Implementar la lógica para dividir el modelo en 3 partes
+        RuntimeAutoFracture autoFractureScript = modelTransform.gameObject.GetComponent<RuntimeAutoFracture>();
+        if (autoFractureScript != null)
+        {
+            autoFractureScript.BreakModel();
+        } else {
+            Debug.LogError("ModelMovementTracker: No se encontró el componente RuntimeAutoFracture en el modelo.");
+        }
     }
 
     // Método público para resetear el tracking (útil para testing)
