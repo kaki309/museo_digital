@@ -1,0 +1,24 @@
+# Simple Test Sequence
+# Quick test file with minimal instructions
+
+# Show an image
+Image: images/test_image
+
+# Wait 1 second
+Wait: 1
+
+# Display text
+Text: "This is a test sequence"
+
+# Wait 2 seconds
+Wait: 2
+
+# Play audio (if available)
+Audio: audio/test_audio
+
+# Wait for audio to finish, then show final message
+Wait: 1
+Text: "Test sequence complete!"
+
+# End
+

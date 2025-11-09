@@ -1,0 +1,45 @@
+# Example Sequence File for SequenceManager
+# Each line represents an instruction in the narrative sequence
+# Lines starting with # are comments and will be ignored
+
+# Show an image
+Image: {this.file.route}/images/welcome
+
+# Wait for 2 seconds
+Wait: 2
+
+# Display some text
+Text: "Welcome to the Digital Museum"
+
+# Wait a bit more
+Wait: 1.5
+
+# Play an audio narration
+Audio: {this.file.route}/audio/narration1
+
+# Show another image
+Image: {this.file.route}/images/exhibit1
+
+# Wait for the user to observe
+Wait: 3
+
+# Play another audio
+Audio: {this.file.route}/audio/narration2
+
+# Display text information
+Text: "This artifact dates back to 500 BC"
+
+# Wait before next section
+Wait: 2
+
+# Execute a custom action (example)
+Action: showNextExhibit
+
+# Show final image
+Image: {this.file.route}/images/thankYou
+
+# Final wait
+Wait: 2
+
+# End of sequence
+

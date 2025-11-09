@@ -1,0 +1,97 @@
+# Test Sequence File for SequenceManager
+# This file demonstrates all available instruction types
+
+# ============================================
+# Section 1: Welcome Sequence
+# ============================================
+
+# Display welcome image
+Image: images/welcome
+
+# Wait 2 seconds for user to see the image
+Wait: 2
+
+# Show welcome text
+Text: "Welcome to the Digital Museum Experience"
+
+# Wait a bit more
+Wait: 1.5
+
+# Play welcome audio narration
+Audio: audio/welcome_narration
+
+# ============================================
+# Section 2: First Exhibit
+# ============================================
+
+# Show first exhibit image
+Image: images/exhibit1
+
+# Wait for observation
+Wait: 3
+
+# Display exhibit information
+Text: "Ancient Artifact - Circa 500 BC"
+
+# Play detailed narration
+Audio: audio/exhibit1_description
+
+# Wait before transitioning
+Wait: 2
+
+# ============================================
+# Section 3: Interactive Section
+# ============================================
+
+# Show interactive image
+Image: images/interactive_section
+
+# Display instructions
+Text: "Use your mouse or controller to explore"
+
+# Wait for interaction
+Wait: 4
+
+# Execute a custom action (e.g., enable interaction)
+Action: enableInteraction
+
+# ============================================
+# Section 4: Second Exhibit
+# ============================================
+
+# Show second exhibit
+Image: images/exhibit2
+
+# Wait
+Wait: 2
+
+# Show information
+Text: "Cultural Artifact - Pre-Columbian Era"
+
+# Play narration
+Audio: audio/exhibit2_description
+
+# ============================================
+# Section 5: Conclusion
+# ============================================
+
+# Wait before conclusion
+Wait: 2
+
+# Show conclusion image
+Image: images/thank_you
+
+# Display thank you message
+Text: "Thank you for visiting our Digital Museum"
+
+# Play closing audio
+Audio: audio/closing_message
+
+# Final wait
+Wait: 3
+
+# Execute final action
+Action: endSequence
+
+# End of test sequence
+
