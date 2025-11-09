@@ -206,7 +206,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   movementThreshold: 1000
-  timeBeforeSceneChange: 6
+  timeBeforeSceneChange: 3
   nextSceneName: Secuence
   showDebugInfo: 1
 --- !u!114 &203114398
