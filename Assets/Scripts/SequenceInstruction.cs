@@ -8,6 +8,7 @@ public enum InstructionType
     Wait,       // Wait: 2.5
     Text,       // Text: "Display this text"
     Action,     // Action: actionName
+    Trivia,     // Trivia: "Question"|"Answer1"|"Answer2"|"Answer3"|correctIndex
     Unknown     // Invalid instruction
 }
 
@@ -19,6 +20,11 @@ public class SequenceInstruction
     public string resourcePath; // Extracted resource path
     public float waitDuration;  // For Wait instructions
     public string displayText;  // For Text instructions
+    
+    // Trivia data
+    public string triviaQuestion;      // The trivia question
+    public string[] triviaAnswers;     // Array of 3 answers
+    public int correctAnswerIndex;     // Index of correct answer (0, 1, or 2)
     
     public SequenceInstruction(string line)
     {
@@ -86,10 +92,63 @@ public class SequenceInstruction
                 resourcePath = content;
                 break;
                 
+            case "trivia":
+                type = InstructionType.Trivia;
+                ParseTriviaData(content);
+                break;
+                
             default:
                 Debug.LogWarning($"Unknown instruction type: {typeString}");
                 type = InstructionType.Unknown;
                 break;
+        }
+    }
+    
+    /// <summary>
+    /// Parses trivia data from format: "Question"|"Answer1"|"Answer2"|"Answer3"|correctIndex
+    /// </summary>
+    private void ParseTriviaData(string triviaContent)
+    {
+        triviaAnswers = new string[3];
+        correctAnswerIndex = 0;
+        
+        // Split by pipe character
+        string[] parts = triviaContent.Split('|');
+        
+        if (parts.Length < 5)
+        {
+            Debug.LogError($"Invalid trivia format. Expected: \"Question\"|\"Answer1\"|\"Answer2\"|\"Answer3\"|correctIndex. Got: {triviaContent}");
+            type = InstructionType.Unknown;
+            return;
+        }
+        
+        // Extract question (remove quotes if present)
+        triviaQuestion = parts[0].Trim().Trim('"', '\'');
+        
+        // Extract answers (remove quotes if present)
+        for (int i = 0; i < 3 && i < parts.Length - 1; i++)
+        {
+            triviaAnswers[i] = parts[i + 1].Trim().Trim('"', '\'');
+        }
+        
+        // Extract correct answer index
+        if (int.TryParse(parts[4].Trim(), out int correctIndex))
+        {
+            // Convert from 1-based (user input) to 0-based (array index)
+            if (correctIndex >= 1 && correctIndex <= 3)
+            {
+                correctAnswerIndex = correctIndex - 1;
+            }
+            else
+            {
+                Debug.LogWarning($"Invalid correct answer index: {correctIndex}. Must be 1, 2, or 3. Defaulting to 1.");
+                correctAnswerIndex = 0;
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"Failed to parse correct answer index: {parts[4]}. Defaulting to 1.");
+            correctAnswerIndex = 0;
         }
     }
     

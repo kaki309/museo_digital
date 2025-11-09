@@ -20,6 +20,19 @@ public class SequenceManager : MonoBehaviour
     [Header("Text Settings")]
     public TMPro.TextMeshProUGUI targetText; // TextMeshPro component for text display
     
+    [Header("Trivia Settings")]
+    public GameObject triviaCanvas; // Canvas GameObject that contains trivia UI
+    public TMPro.TextMeshProUGUI triviaQuestionText; // Text component for the question
+    [Tooltip("Buttons for answers. Text will be automatically set on button's child Text/TextMeshProUGUI component.")]
+    public Button triviaAnswer1Button; // Button for answer 1 (text auto-filled from button's child)
+    public Button triviaAnswer2Button; // Button for answer 2 (text auto-filled from button's child)
+    public Button triviaAnswer3Button; // Button for answer 3 (text auto-filled from button's child)
+     // AudioSource on trivia canvas for playing answer feedback sounds
+    private AudioSource triviaAudioSource;
+    [Tooltip("Audio file names in StreamingAssets/System folder (without extension). Will try .wav, .mp3, .ogg, .m4a")]
+    public string correctAnswerAudio = "correct"; // Audio file name for correct answer
+    public string incorrectAnswerAudio = "incorrect"; // Audio file name for incorrect answer
+    
     [Header("Sequence Control")]
     public bool playOnStart = false;
     public bool loopSequence = false;
@@ -35,6 +48,12 @@ public class SequenceManager : MonoBehaviour
     private Coroutine audioMonitorCoroutine;
     private AudioClip currentAudioClip = null;
     
+    // Trivia state tracking
+    private bool isTriviaActive = false;
+    private bool triviaAnswerSelected = false;
+    private int selectedAnswerIndex = -1;
+    private SequenceInstruction currentTriviaInstruction = null;
+    
     // Events
     public System.Action<SequenceInstruction> OnInstructionStart;
     public System.Action<SequenceInstruction> OnInstructionComplete;
@@ -44,11 +63,156 @@ public class SequenceManager : MonoBehaviour
     {
         // Load and parse the sequence file
         LoadSequence();
+
+        // Setup trivia answer buttons if they exist
+        SetupTriviaButtons();
+        triviaAudioSource = triviaCanvas.GetComponent<AudioSource>();
         
+        // Hide trivia canvas initially
+        if (triviaCanvas != null)
+        {
+            triviaCanvas.SetActive(false);
+        }
+
         // Auto-play if enabled
         if (playOnStart && instructions.Count > 0)
         {
             StartSequence();
+        }
+    
+    }
+    
+    /// <summary>
+    /// Sets up button listeners for trivia answers
+    /// </summary>
+    private void SetupTriviaButtons()
+    {
+        if (triviaAnswer1Button != null)
+        {
+            triviaAnswer1Button.onClick.RemoveAllListeners();
+            triviaAnswer1Button.onClick.AddListener(() => OnTriviaAnswerSelected(0));
+        }
+        
+        if (triviaAnswer2Button != null)
+        {
+            triviaAnswer2Button.onClick.RemoveAllListeners();
+            triviaAnswer2Button.onClick.AddListener(() => OnTriviaAnswerSelected(1));
+        }
+        
+        if (triviaAnswer3Button != null)
+        {
+            triviaAnswer3Button.onClick.RemoveAllListeners();
+            triviaAnswer3Button.onClick.AddListener(() => OnTriviaAnswerSelected(2));
+        }
+    }
+    
+    /// <summary>
+    /// Called when a trivia answer is selected
+    /// </summary>
+    private void OnTriviaAnswerSelected(int answerIndex)
+    {
+        if (!isTriviaActive || currentTriviaInstruction == null)
+        {
+            return;
+        }
+        
+        selectedAnswerIndex = answerIndex;
+        
+        // Check if the answer is correct
+        if (answerIndex == currentTriviaInstruction.correctAnswerIndex)
+        {
+            // Correct answer - play correct audio and resume sequence
+            PlayTriviaAudio(correctAnswerAudio);
+            triviaAnswerSelected = true;
+            isTriviaActive = false;
+        }
+        else
+        {
+            // Wrong answer - play incorrect audio and let user try again
+            PlayTriviaAudio(incorrectAnswerAudio);
+            Debug.Log($"Wrong answer selected. Correct answer is: {currentTriviaInstruction.correctAnswerIndex + 1}");
+        }
+    }
+    
+    /// <summary>
+    /// Plays an audio file from StreamingAssets/System folder
+    /// </summary>
+    private void PlayTriviaAudio(string audioFileName)
+    {
+        if (triviaAudioSource == null)
+        {
+            Debug.LogWarning("Trivia AudioSource is not assigned. Cannot play answer feedback audio.");
+            return;
+        }
+        
+        if (string.IsNullOrEmpty(audioFileName))
+        {
+            Debug.LogWarning("Audio file name is empty. Cannot play trivia audio.");
+            return;
+        }
+        
+        // Start coroutine to load and play audio
+        StartCoroutine(LoadAndPlayTriviaAudio(audioFileName));
+    }
+    
+    /// <summary>
+    /// Loads and plays an audio file from StreamingAssets/System folder
+    /// </summary>
+    private IEnumerator LoadAndPlayTriviaAudio(string audioFileName)
+    {
+        string systemPath = Path.Combine(Application.streamingAssetsPath, "System", audioFileName);
+        string fullPath = "";
+        AudioType audioType = AudioType.WAV;
+        
+        // Try different audio formats
+        string[] extensions = { ".wav", ".mp3", ".ogg", ".m4a" };
+        AudioType[] audioTypes = { AudioType.WAV, AudioType.MPEG, AudioType.OGGVORBIS, AudioType.MPEG };
+        
+        bool fileFound = false;
+        for (int i = 0; i < extensions.Length; i++)
+        {
+            fullPath = systemPath + extensions[i];
+            if (File.Exists(fullPath))
+            {
+                audioType = audioTypes[i];
+                fileFound = true;
+                break;
+            }
+        }
+        
+        if (!fileFound)
+        {
+            Debug.LogWarning($"Trivia audio file not found at: {systemPath} (tried .wav, .mp3, .ogg, .m4a)");
+            yield break;
+        }
+        
+        // Load audio using UnityWebRequest
+        using (UnityEngine.Networking.UnityWebRequest www = UnityEngine.Networking.UnityWebRequestMultimedia.GetAudioClip(
+            "file://" + fullPath, audioType))
+        {
+            yield return www.SendWebRequest();
+            
+            if (www.result == UnityEngine.Networking.UnityWebRequest.Result.Success)
+            {
+                AudioClip clip = UnityEngine.Networking.DownloadHandlerAudioClip.GetContent(www);
+                
+                if (clip != null && triviaAudioSource != null)
+                {
+                    // Stop any currently playing audio on trivia audio source
+                    if (triviaAudioSource.isPlaying)
+                    {
+                        triviaAudioSource.Stop();
+                    }
+                    
+                    // Play the audio
+                    triviaAudioSource.clip = clip;
+                    triviaAudioSource.Play();
+                }
+            }
+            else
+            {
+                Debug.LogError($"Failed to load trivia audio: {www.error}");
+            }
         }
     }
     
@@ -132,6 +296,15 @@ public class SequenceManager : MonoBehaviour
         
         isAudioPlaying = false;
         currentAudioClip = null;
+        
+        // Hide trivia if active
+        if (isTriviaActive && triviaCanvas != null)
+        {
+            triviaCanvas.SetActive(false);
+        }
+        isTriviaActive = false;
+        triviaAnswerSelected = false;
+        currentTriviaInstruction = null;
     }
     
     /// <summary>
@@ -241,6 +414,11 @@ public class SequenceManager : MonoBehaviour
                 
             case InstructionType.Action:
                 ExecuteAction(instruction);
+                break;
+                
+            case InstructionType.Trivia:
+                // Trivia: wait for any audio to finish, then show trivia and wait for correct answer
+                yield return StartCoroutine(ShowTrivia(instruction));
                 break;
         }
     }
@@ -509,6 +687,161 @@ public class SequenceManager : MonoBehaviour
         Debug.Log($"Executing action: {instruction.resourcePath}");
         // You can extend this to handle custom actions
         // For example, trigger animations, change scenes, etc.
+    }
+    
+    /// <summary>
+    /// Shows trivia and waits for the correct answer to be selected
+    /// Waits for any audio to finish before showing trivia
+    /// </summary>
+    private IEnumerator ShowTrivia(SequenceInstruction instruction)
+    {
+        // Wait for any audio to finish playing first
+        if (isAudioPlaying && audioSource != null && audioSource.isPlaying)
+        {
+            Debug.Log("Trivia: Waiting for audio to finish...");
+            yield return StartCoroutine(WaitForAudioToFinish());
+        }
+        
+        // Validate trivia instruction
+        if (instruction.triviaAnswers == null || instruction.triviaAnswers.Length < 3)
+        {
+            Debug.LogError("Invalid trivia instruction: missing answers");
+            yield break;
+        }
+        
+        // Store current trivia instruction
+        currentTriviaInstruction = instruction;
+        isTriviaActive = true;
+        triviaAnswerSelected = false;
+        selectedAnswerIndex = -1;
+        
+        // Show trivia canvas
+        if (triviaCanvas != null)
+        {
+            triviaCanvas.SetActive(true);
+        }
+        else
+        {
+            Debug.LogError("Trivia canvas is not assigned!");
+            yield break;
+        }
+        
+        // Setup button listeners (in case they weren't set up at start or were changed)
+        SetupTriviaButtons();
+        
+        // Display question
+        if (triviaQuestionText != null)
+        {
+            triviaQuestionText.text = instruction.triviaQuestion;
+            triviaQuestionText.gameObject.SetActive(true);
+        }
+        else
+        {
+            Debug.LogWarning("Trivia question text is not assigned!");
+        }
+        
+        // Display answers on buttons - automatically set text on button's child text component
+        SetAnswerText(0, instruction.triviaAnswers[0]);
+        SetAnswerText(1, instruction.triviaAnswers[1]);
+        SetAnswerText(2, instruction.triviaAnswers[2]);
+        
+        // Enable answer buttons
+        if (triviaAnswer1Button != null)
+        {
+            triviaAnswer1Button.gameObject.SetActive(true);
+            triviaAnswer1Button.interactable = true;
+        }
+        
+        if (triviaAnswer2Button != null)
+        {
+            triviaAnswer2Button.gameObject.SetActive(true);
+            triviaAnswer2Button.interactable = true;
+        }
+        
+        if (triviaAnswer3Button != null)
+        {
+            triviaAnswer3Button.gameObject.SetActive(true);
+            triviaAnswer3Button.interactable = true;
+        }
+        
+        // Warn if buttons are not assigned
+        if (triviaAnswer1Button == null || triviaAnswer2Button == null || triviaAnswer3Button == null)
+        {
+            Debug.LogWarning("Trivia: One or more answer buttons are not assigned. Make sure to assign all three answer buttons.");
+        }
+        
+        // Wait until correct answer is selected
+        while (isTriviaActive && !triviaAnswerSelected)
+        {
+            yield return null;
+        }
+        
+        // Wait 2 seconds after correct answer is selected
+        yield return new WaitForSeconds(2f);
+        
+        // Hide trivia canvas
+        if (triviaCanvas != null)
+        {
+            triviaCanvas.SetActive(false);
+        }
+        
+        // Clear trivia state
+        isTriviaActive = false;
+        currentTriviaInstruction = null;
+        triviaAnswerSelected = false;
+        selectedAnswerIndex = -1;
+        
+        Debug.Log("Trivia completed. Resuming sequence...");
+    }
+    
+    /// <summary>
+    /// Sets answer text on the button's child text component
+    /// </summary>
+    private void SetAnswerText(int answerIndex, string answerText)
+    {
+        Button button = null;
+        
+        // Get the button for this answer
+        switch (answerIndex)
+        {
+            case 0:
+                button = triviaAnswer1Button;
+                break;
+            case 1:
+                button = triviaAnswer2Button;
+                break;
+            case 2:
+                button = triviaAnswer3Button;
+                break;
+        }
+        
+        if (button == null)
+        {
+            return;
+        }
+        
+        // Find TextMeshProUGUI in button's children
+        TMPro.TextMeshProUGUI textComponent = button.GetComponentInChildren<TMPro.TextMeshProUGUI>(true);
+        
+        if (textComponent != null)
+        {
+            textComponent.text = answerText;
+            textComponent.gameObject.SetActive(true);
+        }
+        else
+        {
+            // Try legacy Text component as fallback
+            UnityEngine.UI.Text legacyTextComponent = button.GetComponentInChildren<UnityEngine.UI.Text>(true);
+            if (legacyTextComponent != null)
+            {
+                legacyTextComponent.text = answerText;
+                legacyTextComponent.gameObject.SetActive(true);
+            }
+            else
+            {
+                Debug.LogWarning($"Trivia: Button {answerIndex + 1} does not have a Text or TextMeshProUGUI component in its children.");
+            }
+        }
     }
     
     // Public getters
