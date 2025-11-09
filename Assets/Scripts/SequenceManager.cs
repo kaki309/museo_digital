@@ -30,6 +30,11 @@ public class SequenceManager : MonoBehaviour
     private bool isPlaying = false;
     private Coroutine currentSequenceCoroutine;
     
+    // Audio state tracking for non-blocking playback
+    private bool isAudioPlaying = false;
+    private Coroutine audioMonitorCoroutine;
+    private AudioClip currentAudioClip = null;
+    
     // Events
     public System.Action<SequenceInstruction> OnInstructionStart;
     public System.Action<SequenceInstruction> OnInstructionComplete;
@@ -117,6 +122,16 @@ public class SequenceManager : MonoBehaviour
         {
             audioSource.Stop();
         }
+        
+        // Stop audio monitoring
+        if (audioMonitorCoroutine != null)
+        {
+            StopCoroutine(audioMonitorCoroutine);
+            audioMonitorCoroutine = null;
+        }
+        
+        isAudioPlaying = false;
+        currentAudioClip = null;
     }
     
     /// <summary>
@@ -137,9 +152,14 @@ public class SequenceManager : MonoBehaviour
     public void ResumeSequence()
     {
         isPlaying = true;
-        if (audioSource != null)
+        if (audioSource != null && audioSource.isPlaying)
         {
             audioSource.UnPause();
+            // If audio was playing, restore the monitoring
+            if (isAudioPlaying && audioMonitorCoroutine == null)
+            {
+                audioMonitorCoroutine = StartCoroutine(MonitorAudioPlayback());
+            }
         }
         if (currentSequenceCoroutine == null)
         {
@@ -203,6 +223,7 @@ public class SequenceManager : MonoBehaviour
         switch (instruction.type)
         {
             case InstructionType.Audio:
+                // For audio: wait for previous audio to finish, then start new one (non-blocking)
                 yield return StartCoroutine(PlayAudio(instruction));
                 break;
                 
@@ -225,7 +246,8 @@ public class SequenceManager : MonoBehaviour
     }
     
     /// <summary>
-    /// Plays an audio file
+    /// Plays an audio file (non-blocking - audio plays in background while sequence continues)
+    /// If another audio is playing, waits for it to finish before starting the new one
     /// </summary>
     private IEnumerator PlayAudio(SequenceInstruction instruction)
     {
@@ -235,8 +257,18 @@ public class SequenceManager : MonoBehaviour
             yield break;
         }
         
+        // If audio is already playing, wait for it to finish
+        if (isAudioPlaying && audioSource.isPlaying)
+        {
+            Debug.Log("Audio already playing. Waiting for current audio to finish...");
+            yield return StartCoroutine(WaitForAudioToFinish());
+        }
+        
+        // Load the audio clip
+        AudioClip clip = null;
+        
         // Try to load from Resources first
-        AudioClip clip = Resources.Load<AudioClip>(instruction.resourcePath);
+        clip = Resources.Load<AudioClip>(instruction.resourcePath);
         
         if (clip == null)
         {
@@ -249,8 +281,8 @@ public class SequenceManager : MonoBehaviour
             AudioType audioType = AudioType.WAV;
             
             // Try different audio formats
-            string[] extensions = { ".wav", ".mp3", ".ogg" };
-            AudioType[] audioTypes = { AudioType.WAV, AudioType.MPEG, AudioType.OGGVORBIS };
+            string[] extensions = { ".wav", ".mp3", ".ogg", ".m4a" };
+            AudioType[] audioTypes = { AudioType.WAV, AudioType.MPEG, AudioType.OGGVORBIS, AudioType.MPEG };
             
             bool fileFound = false;
             for (int i = 0; i < extensions.Length; i++)
@@ -283,25 +315,97 @@ public class SequenceManager : MonoBehaviour
             }
             else
             {
-                Debug.LogError($"Audio file not found at: {basePath} (tried .wav, .mp3, .ogg)");
+                Debug.LogError($"Audio file not found at: {basePath} (tried .wav, .mp3, .ogg, .m4a)");
             }
         }
         
         if (clip != null)
         {
+            // Ensure previous audio is fully stopped and state is cleared
+            if (audioSource.isPlaying)
+            {
+                audioSource.Stop();
+            }
+            
+            // Clear previous audio state
+            isAudioPlaying = false;
+            if (audioMonitorCoroutine != null)
+            {
+                StopCoroutine(audioMonitorCoroutine);
+                audioMonitorCoroutine = null;
+            }
+            
+            // Set and play the new audio
             audioSource.clip = clip;
+            currentAudioClip = clip;
             audioSource.Play();
             
-            // Wait for audio to finish
-            while (audioSource.isPlaying)
+            // Mark audio as playing
+            isAudioPlaying = true;
+            
+            // Start monitoring audio playback (to update isAudioPlaying flag when it finishes)
+            audioMonitorCoroutine = StartCoroutine(MonitorAudioPlayback());
+            
+            // Wait until audio actually starts playing (with timeout for safety)
+            float timeout = 2f;
+            float elapsed = 0f;
+            while (!audioSource.isPlaying && elapsed < timeout)
             {
+                elapsed += Time.deltaTime;
                 yield return null;
+            }
+            
+            if (!audioSource.isPlaying)
+            {
+                Debug.LogWarning("Audio failed to start playing within timeout period.");
+                isAudioPlaying = false;
+            }
+            else
+            {
+                // Audio started successfully - wait a brief moment to ensure it's fully started
+                yield return new WaitForSeconds(0.05f);
             }
         }
         else
         {
             Debug.LogError($"Failed to load audio: {instruction.resourcePath}");
         }
+    }
+    
+    /// <summary>
+    /// Waits for the current audio to finish playing
+    /// </summary>
+    private IEnumerator WaitForAudioToFinish()
+    {
+        // Wait until audio is no longer playing
+        while (audioSource != null && audioSource.isPlaying)
+        {
+            yield return null;
+        }
+        
+        // Ensure state is cleared
+        isAudioPlaying = false;
+        if (audioMonitorCoroutine != null)
+        {
+            StopCoroutine(audioMonitorCoroutine);
+            audioMonitorCoroutine = null;
+        }
+    }
+    
+    /// <summary>
+    /// Monitors audio playback and updates the isAudioPlaying flag when audio finishes
+    /// </summary>
+    private IEnumerator MonitorAudioPlayback()
+    {
+        while (audioSource != null && audioSource.isPlaying)
+        {
+            yield return null;
+        }
+        
+        // Audio finished playing
+        isAudioPlaying = false;
+        currentAudioClip = null;
+        audioMonitorCoroutine = null;
     }
     
     /// <summary>
