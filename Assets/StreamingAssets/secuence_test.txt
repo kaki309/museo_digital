@@ -11,6 +11,13 @@ Wait: 1
 # Play audio (if available)
 Audio: audio/Bienvenida
 
+LaiaPosition: 1
+LaiaImage: LaiaAngry
+Wait: 3
+
+LaiaPosition: 5
+LaiaImage: LaiaHappy
+
 # Wait 1 second
 Wait: 1
 
@@ -22,9 +29,13 @@ Wait: 1
 
 # Display text
 Text: "Aquí va mucha info jaja"
+LaiaPosition: 3
+LaiaImage: LaiaHappy
 
 # Play audio 
 Audio: audio/Primer audio
+LaiaPosition: 2
+LaiaImage: LaiaSad
 
 # Trivia question
 Trivia: "¿Qué es un museo digital?"|"Un edificio físico"|"Una experiencia interactiva virtual"|"Un tipo de pintura"|2

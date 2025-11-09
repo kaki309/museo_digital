@@ -9,6 +9,7 @@ public enum InstructionType
     Text,       // Text: "Display this text"
     Action,     // Action: actionName
     Trivia,     // Trivia: "Question"|"Answer1"|"Answer2"|"Answer3"|correctIndex
+    LaiaImage,    // LaiaImage: LaiaHappy (image name from StreamingAssets/System/LaiaImage)
     Unknown     // Invalid instruction
 }
 
@@ -25,6 +26,9 @@ public class SequenceInstruction
     public string triviaQuestion;      // The trivia question
     public string[] triviaAnswers;     // Array of 3 answers
     public int correctAnswerIndex;     // Index of correct answer (0, 1, or 2)
+    
+    // Laia data
+    public string laiaImageName;       // Image name for Laia's facial expression
     
     public SequenceInstruction(string line)
     {
@@ -55,6 +59,13 @@ public class SequenceInstruction
         // Extract type and content
         string typeString = line.Substring(0, colonIndex).Trim();
         content = line.Substring(colonIndex + 1).Trim();
+        
+        // Remove inline comments (everything after #)
+        int commentIndex = content.IndexOf('#');
+        if (commentIndex != -1)
+        {
+            content = content.Substring(0, commentIndex).Trim();
+        }
         
         // Determine instruction type
         switch (typeString.ToLower())
@@ -95,6 +106,11 @@ public class SequenceInstruction
             case "trivia":
                 type = InstructionType.Trivia;
                 ParseTriviaData(content);
+                break;
+                
+            case "laiaimage":
+                type = InstructionType.LaiaImage;
+                laiaImageName = content.Trim().Trim('"', '\'');
                 break;
                 
             default:

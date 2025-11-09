@@ -33,6 +33,12 @@ public class SequenceManager : MonoBehaviour
     public string correctAnswerAudio = "correct"; // Audio file name for correct answer
     public string incorrectAnswerAudio = "incorrect"; // Audio file name for incorrect answer
     
+    [Header("Laia Assistant Settings")]
+    public GameObject laiaObject; // GameObject representing Laia (will be moved to positions)
+    public RawImage laiaImage; // UI RawImage to display Laia's facial expressions
+    [Tooltip("Array of Transform positions where Laia can move. Index is 1-based (1 = first position, 2 = second, etc.)")]
+    public Transform[] laiaPositions; // Predefined positions for Laia to move to
+    
     [Header("Sequence Control")]
     public bool playOnStart = false;
     public bool loopSequence = false;
@@ -54,6 +60,9 @@ public class SequenceManager : MonoBehaviour
     private int selectedAnswerIndex = -1;
     private SequenceInstruction currentTriviaInstruction = null;
     
+    // Laia position tracking
+    private int currentLaiaPositionIndex = 0; // Current position index (0-based for array)
+    
     // Events
     public System.Action<SequenceInstruction> OnInstructionStart;
     public System.Action<SequenceInstruction> OnInstructionComplete;
@@ -66,20 +75,73 @@ public class SequenceManager : MonoBehaviour
 
         // Setup trivia answer buttons if they exist
         SetupTriviaButtons();
-        triviaAudioSource = triviaCanvas.GetComponent<AudioSource>();
         
         // Hide trivia canvas initially
         if (triviaCanvas != null)
         {
             triviaCanvas.SetActive(false);
         }
+        
+        // Initialize trivia AudioSource from trivia canvas
+        InitializeTriviaAudioSource();
+        
+        // Initialize Laia image to LaiaHappy
+        InitializeLaiaImage();
 
         // Auto-play if enabled
         if (playOnStart && instructions.Count > 0)
         {
             StartSequence();
         }
+    }
     
+    /// <summary>
+    /// Initializes Laia's image to LaiaHappy automatically
+    /// </summary>
+    private void InitializeLaiaImage()
+    {
+        if (laiaImage == null)
+        {
+            return; // Laia image not assigned, skip initialization
+        }
+        
+        // Try to load LaiaHappy from StreamingAssets/System/LaiaImage
+        string imagePath = Path.Combine(Application.streamingAssetsPath, "System", "LaiaImage", "LaiaHappy");
+        string[] extensions = { ".png", ".jpg", ".jpeg" };
+        string fullPath = "";
+        bool fileFound = false;
+        
+        // Try different image formats
+        foreach (string ext in extensions)
+        {
+            fullPath = imagePath + ext;
+            if (File.Exists(fullPath))
+            {
+                fileFound = true;
+                break;
+            }
+        }
+        
+        if (!fileFound)
+        {
+            Debug.LogWarning($"LaiaHappy image file not found at: {imagePath} (tried .png, .jpg, .jpeg). Laia image will not be initialized.");
+            return;
+        }
+        
+        // Load and display the image
+        byte[] fileData = File.ReadAllBytes(fullPath);
+        Texture2D texture = new Texture2D(2, 2);
+        
+        if (texture.LoadImage(fileData))
+        {
+            laiaImage.texture = texture;
+            laiaImage.gameObject.SetActive(true);
+            Debug.Log("Laia image initialized to LaiaHappy");
+        }
+        else
+        {
+            Debug.LogError($"Failed to load LaiaHappy image data from: {fullPath}");
+        }
     }
     
     /// <summary>
@@ -135,13 +197,36 @@ public class SequenceManager : MonoBehaviour
     }
     
     /// <summary>
+    /// Initializes the trivia AudioSource from the trivia canvas GameObject
+    /// </summary>
+    private void InitializeTriviaAudioSource()
+    {
+        if (triviaCanvas == null)
+        {
+            Debug.LogWarning("Trivia canvas is not assigned. Cannot initialize trivia AudioSource.");
+            return;
+        }
+        
+        triviaAudioSource = triviaCanvas.GetComponent<AudioSource>();
+        
+        if (triviaAudioSource == null)
+        {
+            Debug.LogWarning("No AudioSource found on trivia canvas. Trivia answer audio will not play.");
+        }
+        else
+        {
+            Debug.Log("Trivia AudioSource initialized successfully.");
+        }
+    }
+    
+    /// <summary>
     /// Plays an audio file from StreamingAssets/System folder
     /// </summary>
     private void PlayTriviaAudio(string audioFileName)
     {
         if (triviaAudioSource == null)
         {
-            Debug.LogWarning("Trivia AudioSource is not assigned. Cannot play answer feedback audio.");
+            Debug.LogWarning("Trivia AudioSource is not initialized. Cannot play answer feedback audio.");
             return;
         }
         
@@ -207,6 +292,10 @@ public class SequenceManager : MonoBehaviour
                     // Play the audio
                     triviaAudioSource.clip = clip;
                     triviaAudioSource.Play();
+                }
+                else if (clip != null && triviaAudioSource == null)
+                {
+                    Debug.LogWarning("Trivia AudioSource is null. Cannot play audio.");
                 }
             }
             else
@@ -420,6 +509,11 @@ public class SequenceManager : MonoBehaviour
                 // Trivia: wait for any audio to finish, then show trivia and wait for correct answer
                 yield return StartCoroutine(ShowTrivia(instruction));
                 break;
+                
+            case InstructionType.LaiaImage:
+                // Change Laia's facial expression
+                ChangeLaiaImage(instruction);
+                break;
         }
     }
     
@@ -542,6 +636,9 @@ public class SequenceManager : MonoBehaviour
             {
                 // Audio started successfully - wait a brief moment to ensure it's fully started
                 yield return new WaitForSeconds(0.05f);
+                
+                // Automatically move Laia to next position when audio starts
+                MoveLaiaToNextPosition();
             }
         }
         else
@@ -841,6 +938,98 @@ public class SequenceManager : MonoBehaviour
             {
                 Debug.LogWarning($"Trivia: Button {answerIndex + 1} does not have a Text or TextMeshProUGUI component in its children.");
             }
+        }
+    }
+    
+    /// <summary>
+    /// Automatically moves Laia to the next position (cycles through positions)
+    /// Called automatically when audio starts playing
+    /// </summary>
+    private void MoveLaiaToNextPosition()
+    {
+        if (laiaObject == null)
+        {
+            return; // Laia object not assigned, skip
+        }
+        
+        if (laiaPositions == null || laiaPositions.Length == 0)
+        {
+            return; // No positions defined, skip
+        }
+        
+        // Cycle to next position
+        Transform targetPosition = laiaPositions[currentLaiaPositionIndex];
+        
+        if (targetPosition == null)
+        {
+            Debug.LogWarning($"Laia position at index {currentLaiaPositionIndex} is null.");
+            // Move to next position anyway
+            currentLaiaPositionIndex = (currentLaiaPositionIndex + 1) % laiaPositions.Length;
+            return;
+        }
+        
+        // Move Laia to the target position
+        laiaObject.transform.position = targetPosition.position;
+        laiaObject.transform.rotation = targetPosition.rotation;
+        
+        Debug.Log($"Laia moved to position {currentLaiaPositionIndex + 1} (automatically on audio start)");
+        
+        // Move to next position for next audio
+        currentLaiaPositionIndex = (currentLaiaPositionIndex + 1) % laiaPositions.Length;
+    }
+    
+    /// <summary>
+    /// Changes Laia's facial expression image (RawImage - supports .jpg files)
+    /// </summary>
+    private void ChangeLaiaImage(SequenceInstruction instruction)
+    {
+        if (laiaImage == null)
+        {
+            Debug.LogWarning("Laia image (RawImage component) is not assigned. Cannot change Laia image.");
+            return;
+        }
+        
+        if (string.IsNullOrEmpty(instruction.laiaImageName))
+        {
+            Debug.LogWarning("Laia image name is empty. Cannot change Laia image.");
+            return;
+        }
+        
+        // Try to load from StreamingAssets/System/LaiaImage
+        string imagePath = Path.Combine(Application.streamingAssetsPath, "System", "LaiaImage", instruction.laiaImageName);
+        string[] extensions = { ".png", ".jpg", ".jpeg" };
+        string fullPath = "";
+        bool fileFound = false;
+        
+        // Try different image formats
+        foreach (string ext in extensions)
+        {
+            fullPath = imagePath + ext;
+            if (File.Exists(fullPath))
+            {
+                fileFound = true;
+                break;
+            }
+        }
+        
+        if (!fileFound)
+        {
+            Debug.LogError($"Laia image file not found at: {imagePath} (tried .png, .jpg, .jpeg)");
+            return;
+        }
+        
+        // Load and display the image as a Texture2D (for RawImage)
+        byte[] fileData = File.ReadAllBytes(fullPath);
+        Texture2D texture = new Texture2D(2, 2);
+        
+        if (texture.LoadImage(fileData))
+        {
+            laiaImage.texture = texture;
+            laiaImage.gameObject.SetActive(true);
+        }
+        else
+        {
+            Debug.LogError($"Failed to load Laia image data from: {fullPath}");
         }
     }
     
