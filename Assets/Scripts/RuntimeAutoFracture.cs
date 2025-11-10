@@ -150,9 +150,9 @@ public class RuntimeAutoFracture : MonoBehaviour
                     preSlicedParts.Add(middlePart);
                     preSlicedParts.Add(bottomPartFinal);
 
-                    // Pre-calcular direcciones de separación (sin rotación, solo movimiento)
+                    // Pre-calcular direcciones de separación (solo X e Y, sin Z)
                     separationDirections[0] = new Vector3(-0.5f, 0.3f, 0f).normalized;
-                    separationDirections[1] = new Vector3(0f, 0.3f, 0.5f).normalized;
+                    separationDirections[1] = new Vector3(0f, 0.3f, 0f).normalized;
                     separationDirections[2] = new Vector3(0.5f, -0.3f, 0f).normalized;
 
                     Destroy(bottomPart);
@@ -167,6 +167,7 @@ public class RuntimeAutoFracture : MonoBehaviour
                     bottomPart.SetActive(false);
                     preSlicedParts.Add(topPart);
                     preSlicedParts.Add(bottomPart);
+                    // Fallback: solo 2 partes (solo X e Y)
                     separationDirections[0] = new Vector3(-0.5f, 0.3f, 0f).normalized;
                     separationDirections[1] = new Vector3(0.5f, -0.3f, 0f).normalized;
                 }
@@ -228,9 +229,9 @@ public class RuntimeAutoFracture : MonoBehaviour
             parts[i].transform.SetParent(container.transform);
             parts[i].SetActive(false);
             preSlicedParts.Add(parts[i]);
-            // Direcciones de separación distribuidas uniformemente
+            // Direcciones de separación distribuidas uniformemente (solo X e Y)
             float angle = (i * 360f / partCount) * Mathf.Deg2Rad;
-            separationDirections[i] = new Vector3(Mathf.Cos(angle), 0.2f, Mathf.Sin(angle)).normalized;
+            separationDirections[i] = new Vector3(Mathf.Cos(angle), 0.2f, 0f).normalized;
         }
     }
 
@@ -280,14 +281,14 @@ public class RuntimeAutoFracture : MonoBehaviour
                     // Destruir la copia activa ya que ya no la necesitamos
                     Destroy(activeCopy);
 
-                    // Configurar las 3 partes finales (sin rotación, solo movimiento)
+                    // Configurar las 3 partes finales (solo movimiento en X e Y)
                     SetupFragment(upperPart, new Vector3(-0.5f, 0.3f, 0f).normalized, 0);
-                    SetupFragment(middlePart, new Vector3(0f, 0.3f, 0.5f).normalized, 1);
+                    SetupFragment(middlePart, new Vector3(0f, 0.3f, 0f).normalized, 1);
                     SetupFragment(bottomPart, new Vector3(0.5f, -0.3f, 0f).normalized, 2);
                 }
                 else
                 {
-                    // Si el segundo corte falla, usar solo las 2 partes
+                    // Si el segundo corte falla, usar solo las 2 partes (solo X e Y)
                     Destroy(activeCopy);
                     SetupFragment(upperPart, new Vector3(-0.5f, 0.3f, 0f).normalized, 0);
                     SetupFragment(lowerPart, new Vector3(0.5f, -0.3f, 0f).normalized, 1);
@@ -356,12 +357,12 @@ public class RuntimeAutoFracture : MonoBehaviour
             Destroy(currentTarget);
         }
 
-        // Configurar las partes resultantes (máximo 3)
+        // Configurar las partes resultantes (máximo 3, solo movimiento en X e Y)
         int partCount = Mathf.Min(parts.Count, 3);
         for (int i = 0; i < partCount; i++)
         {
             float angle = (i * 360f / partCount) * Mathf.Deg2Rad;
-            Vector3 direction = new Vector3(Mathf.Cos(angle), 0.2f, Mathf.Sin(angle)).normalized;
+            Vector3 direction = new Vector3(Mathf.Cos(angle), 0.2f, 0f).normalized;
             SetupFragment(parts[i], direction, i);
         }
     }

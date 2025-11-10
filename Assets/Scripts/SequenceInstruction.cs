@@ -21,6 +21,7 @@ public class SequenceInstruction
     public string resourcePath; // Extracted resource path
     public float waitDuration;  // For Wait instructions
     public string displayText;  // For Text instructions
+    public bool isCleanCommand; // True if instruction is a "clean" command (e.g., "Image: clean")
     
     // Trivia data
     public string triviaQuestion;      // The trivia question
@@ -67,17 +68,26 @@ public class SequenceInstruction
             content = content.Substring(0, commentIndex).Trim();
         }
         
+        // Check if this is a "clean" command
+        isCleanCommand = content.ToLower() == "clean";
+        
         // Determine instruction type
         switch (typeString.ToLower())
         {
             case "audio":
                 type = InstructionType.Audio;
-                resourcePath = ProcessResourcePath(content);
+                if (!isCleanCommand)
+                {
+                    resourcePath = ProcessResourcePath(content);
+                }
                 break;
                 
             case "image":
                 type = InstructionType.Image;
-                resourcePath = ProcessResourcePath(content);
+                if (!isCleanCommand)
+                {
+                    resourcePath = ProcessResourcePath(content);
+                }
                 break;
                 
             case "wait":
@@ -95,7 +105,10 @@ public class SequenceInstruction
                 
             case "text":
                 type = InstructionType.Text;
-                displayText = content.Trim('"', '\''); // Remove quotes if present
+                if (!isCleanCommand)
+                {
+                    displayText = content.Trim('"', '\''); // Remove quotes if present
+                }
                 break;
                 
             case "action":
@@ -110,7 +123,10 @@ public class SequenceInstruction
                 
             case "laiaimage":
                 type = InstructionType.LaiaImage;
-                laiaImageName = content.Trim().Trim('"', '\'');
+                if (!isCleanCommand)
+                {
+                    laiaImageName = content.Trim().Trim('"', '\'');
+                }
                 break;
                 
             default:

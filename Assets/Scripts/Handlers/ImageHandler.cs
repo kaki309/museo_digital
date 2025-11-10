@@ -18,6 +18,16 @@ public class ImageHandler : MonoBehaviour
     {
         targetImage = rawImage;
         targetSpriteImage = spriteImage;
+        
+        // Start with image components disabled
+        if (targetImage != null)
+        {
+            targetImage.gameObject.SetActive(false);
+        }
+        if (targetSpriteImage != null)
+        {
+            targetSpriteImage.gameObject.SetActive(false);
+        }
     }
     
     /// <summary>

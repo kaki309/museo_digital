@@ -6,7 +6,7 @@ using System.IO;
 /// Handles Laia assistant position and image changes
 /// </summary>
 public class LaiaHandler : MonoBehaviour
-{
+{   
     private GameObject laiaObject;
     private RawImage laiaImage;
     private Transform[] laiaPositions;
@@ -33,7 +33,7 @@ public class LaiaHandler : MonoBehaviour
         }
         
         // Try to load LaiaHappy from StreamingAssets/System/LaiaImage
-        string imagePath = Path.Combine(Application.streamingAssetsPath, "System", "LaiaImage", "LaiaHappy");
+        string imagePath = Path.Combine(Application.streamingAssetsPath, "System", "LaiaImage", "LaiaFeliz");
         string[] extensions = { ".png", ".jpg", ".jpeg" };
         string fullPath = "";
         bool fileFound = false;
@@ -51,7 +51,7 @@ public class LaiaHandler : MonoBehaviour
         
         if (!fileFound)
         {
-            Debug.LogWarning($"LaiaHappy image file not found at: {imagePath} (tried .png, .jpg, .jpeg). Laia image will not be initialized.");
+            Debug.LogWarning($"LaiaFeliz image file not found at: {imagePath} (tried .png, .jpg, .jpeg). Laia image will not be initialized.");
             return;
         }
         

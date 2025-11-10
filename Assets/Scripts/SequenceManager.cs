@@ -327,7 +327,14 @@ public class SequenceManager : MonoBehaviour
                 break;
                 
             case InstructionType.Image:
-                imageHandler?.ShowImage(instruction.resourcePath);
+                if (instruction.isCleanCommand)
+                {
+                    imageHandler?.Clean();
+                }
+                else
+                {
+                    imageHandler?.ShowImage(instruction.resourcePath);
+                }
                 break;
                 
             case InstructionType.Wait:
@@ -335,7 +342,14 @@ public class SequenceManager : MonoBehaviour
                 break;
                 
             case InstructionType.Text:
-                textHandler?.ShowText(instruction.displayText);
+                if (instruction.isCleanCommand)
+                {
+                    textHandler?.Clean();
+                }
+                else
+                {
+                    textHandler?.ShowText(instruction.displayText);
+                }
                 break;
                 
             case InstructionType.Action:
@@ -350,8 +364,16 @@ public class SequenceManager : MonoBehaviour
                 break;
                 
             case InstructionType.LaiaImage:
-                // Change Laia's facial expression
-                laiaHandler?.ChangeImage(instruction.laiaImageName);
+                if (instruction.isCleanCommand)
+                {
+                    // Clean Laia image
+                    laiaHandler?.Clean();
+                }
+                else
+                {
+                    // Change Laia's facial expression
+                    laiaHandler?.ChangeImage(instruction.laiaImageName);
+                }
                 break;
         }
     }
