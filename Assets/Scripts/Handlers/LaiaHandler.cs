@@ -10,7 +10,6 @@ public class LaiaHandler : MonoBehaviour
     private GameObject laiaObject;
     private RawImage laiaImage;
     private Transform[] laiaPositions;
-    private int currentLaiaPositionIndex = 0; // Current position index (0-based for array)
     
     /// <summary>
     /// Initialize the Laia handler with required components
@@ -72,7 +71,7 @@ public class LaiaHandler : MonoBehaviour
     }
     
     /// <summary>
-    /// Automatically moves Laia to the next position (cycles through positions)
+    /// Automatically moves Laia to a random position from available positions
     /// Called automatically when audio starts playing
     /// </summary>
     public void MoveToNextPosition()
@@ -87,14 +86,13 @@ public class LaiaHandler : MonoBehaviour
             return; // No positions defined, skip
         }
         
-        // Cycle to next position
-        Transform targetPosition = laiaPositions[currentLaiaPositionIndex];
+        // Select a random position
+        int randomIndex = Random.Range(0, laiaPositions.Length);
+        Transform targetPosition = laiaPositions[randomIndex];
         
         if (targetPosition == null)
         {
-            Debug.LogWarning($"Laia position at index {currentLaiaPositionIndex} is null.");
-            // Move to next position anyway
-            currentLaiaPositionIndex = (currentLaiaPositionIndex + 1) % laiaPositions.Length;
+            Debug.LogWarning($"Laia position at index {randomIndex} is null.");
             return;
         }
         
@@ -102,10 +100,7 @@ public class LaiaHandler : MonoBehaviour
         laiaObject.transform.position = targetPosition.position;
         laiaObject.transform.rotation = targetPosition.rotation;
         
-        Debug.Log($"Laia moved to position {currentLaiaPositionIndex + 1} (automatically on audio start)");
-        
-        // Move to next position for next audio
-        currentLaiaPositionIndex = (currentLaiaPositionIndex + 1) % laiaPositions.Length;
+        Debug.Log($"Laia moved to random position {randomIndex + 1} (automatically on audio start)");
     }
     
     /// <summary>

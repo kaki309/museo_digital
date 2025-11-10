@@ -1,0 +1,35 @@
+# Secuencia interactiva: Silbato en forma de perro - Cultura Quimbaya
+
+# --- SECCIÓN 1: INTRODUCCIÓN ---
+Audio: audio/intro_silbato
+Text: "Silbato en forma de perro - Cultura Quimbaya"
+Image: images/silbato_perro_quimbaya
+
+Audio: audio/descripcion_pieza
+Text: "Razgos estilizados. Posible uso en ceremonias o rituales."
+
+# --- TRIVIA 1 ---
+Trivia: "¿Qué representa la forma del silbato?"|"Un ave"|"Un perro"|"Un felino"|2
+
+# --- SECCIÓN 2: CONTEXTO CULTURAL ---
+Audio: audio/contexto_quimbaya
+Text: "Valle del río Cauca. Reconocidos por la orfebrería y la cerámica."
+Image: images/contexto_quimbaya
+Wait: 5
+Image: images/orfebreria
+Wait: 2
+Image: images/ceramica
+Wait:3
+
+# --- TRIVIA 2 ---
+Trivia: "¿En qué región se originó la cultura Quimbaya?"|"Costa Caribe"|"Valle del río Cauca"|"Altiplano Cundiboyacense"|2
+
+# --- SECCIÓN 3: USO Y SIGNIFICADO ---
+Audio: audio/uso_silbato
+Text: "Se cree que estos silbatos producían sonidos que acompañaban rituales o servían para comunicarse durante celebraciones."
+Image: clean
+
+# --- TRIVIA 3 ---
+Trivia: "¿Qué valor simbólico tenía el silbato en forma de perro para la cultura Quimbaya?"|"Representaba la fuerza del jaguar"|"Era un juguete infantil"|"Evidenciaba su vínculo espiritual con los animales"|3
+
+# End
