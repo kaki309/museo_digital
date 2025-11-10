@@ -1,0 +1,10 @@
+# Secuencia para cuando el modelo se rompe en pedazos
+
+Audio: System/noManipularPiezas
+LaiaImage: LaiaAsustada
+
+Audio: System/reconstruirPieza
+LaiaImage: LaiaFeliz
+Wait: 5
+
+# End

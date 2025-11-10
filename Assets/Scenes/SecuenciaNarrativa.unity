@@ -897,7 +897,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05f04aa8af2cad54c88873c8bd41c697, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sequenceFileName: secuence_test
+  sequenceFileName: short_test
   audioSource: {fileID: 439258147}
   targetImage: {fileID: 0}
   targetSpriteImage: {fileID: 1293172486}

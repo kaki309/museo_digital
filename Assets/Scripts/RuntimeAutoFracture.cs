@@ -5,6 +5,7 @@ using EzySlice;
 
 public class RuntimeAutoFracture : MonoBehaviour
 {
+
     [Header("Configuración de fractura")]
     [Tooltip("Material para las secciones de corte (opcional)")]
     public Material crossSectionMaterial;
@@ -29,6 +30,7 @@ public class RuntimeAutoFracture : MonoBehaviour
 
     void Start()
     {
+
         // Asume que el modelo es el primer hijo del contenedor
         if (transform.childCount > 0)
             modelChild = transform.GetChild(0);
