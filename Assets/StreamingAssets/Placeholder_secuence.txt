@@ -1,0 +1,44 @@
+# Secuencia: Silbato en forma de perro - Cultura Quimbaya
+# Autor: [Tu nombre]
+# Descripción: Presentación interactiva con audios, imágenes y trivias sobre la pieza arqueológica.
+
+# Introducción
+Text: "Bienvenido a esta experiencia sobre el Silbato en forma de perro, una pieza de la cultura Quimbaya del valle colombiano."
+Audio: audio/intro_quimbaya
+Wait: 2
+
+# Mostrar imagen de la pieza
+Image: images/silbato_perro_quimbaya
+Text: "Esta pieza, elaborada en cerámica, representa un perro con detalles estilizados y era utilizada posiblemente en rituales."
+Audio: audio/descripcion_pieza
+Wait: 3
+
+# Detalle cultural
+Text: "La cultura Quimbaya se destacó por su habilidad artesanal, especialmente en la orfebrería y la cerámica."
+Audio: audio/contexto_cultural
+Image: images/quimbaya_contexto
+Wait: 3
+
+# Trivia 1
+Trivia: "¿Qué material se utilizó para fabricar el silbato en forma de perro?"|"Oro"|"Cerámica"|"Piedra"|2
+Audio: audio/trivia_1_feedback
+Wait: 2
+
+# Profundización sonora
+Text: "Este tipo de silbatos producían sonidos agudos que acompañaban ceremonias o actividades cotidianas."
+Audio: audio/sonido_silbato_demo
+Image: images/silbato_sonido
+Wait: 3
+
+# Trivia 2
+Trivia: "¿A qué cultura pertenece esta pieza arqueológica?"|"Muisca"|"Tairona"|"Quimbaya"|"Zenú"|3
+Audio: audio/trivia_2_feedback
+Wait: 2
+
+# Cierre
+Text: "Has completado el recorrido. Gracias por explorar la historia sonora y simbólica del Silbato en forma de perro Quimbaya."
+Audio: audio/despedida
+Image: images/fondo_despedida
+Wait: 2
+
+# End

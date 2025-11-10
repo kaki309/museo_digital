@@ -1,0 +1,48 @@
+# Simple Test Sequence
+# Quick test file with minimal instructions
+
+Text: "Iniciando en... 3"
+Wait: 1
+Text: "Iniciando en... 2"
+Wait: 1
+Text: "Iniciando en... 1"
+Wait: 1
+
+# Play audio (if available)
+Audio: audio/Bienvenida
+
+LaiaPosition: 1
+LaiaImage: LaiaAngry
+Wait: 3
+
+LaiaPosition: 5
+LaiaImage: LaiaHappy
+
+# Wait 1 second
+Wait: 1
+
+# Show an image
+Image: images/kirby nadando
+
+# Wait 1 second
+Wait: 1
+
+# Display text
+Text: "Aquí va mucha info jaja"
+LaiaPosition: 3
+LaiaImage: LaiaHappy
+
+# Play audio 
+Audio: audio/Primer audio
+LaiaPosition: 2
+LaiaImage: LaiaSad
+
+# Trivia question
+Trivia: "¿Qué es un museo digital?"|"Un edificio físico"|"Una experiencia interactiva virtual"|"Un tipo de pintura"|2
+
+# Wait for audio to finish, then play other audio
+Audio: audio/Segundo audio
+
+# End
+
+

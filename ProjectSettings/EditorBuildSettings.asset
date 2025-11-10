@@ -11,4 +11,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/interfaz.unity
     guid: 3e6fbdbe111dba448a1173414ae23237
+  - enabled: 1
+    path: Assets/Scenes/SecuenciaNarrativa.unity
+    guid: 9129f73df45707d4da804c9eb5ca559f
   m_configObjects: {}
