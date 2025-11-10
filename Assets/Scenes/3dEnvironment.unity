@@ -138,6 +138,8 @@ GameObject:
   - component: {fileID: 203114394}
   - component: {fileID: 203114396}
   - component: {fileID: 203114395}
+  - component: {fileID: 203114397}
+  - component: {fileID: 203114398}
   m_Layer: 0
   m_Name: ModelRoot
   m_TagString: Untagged
@@ -191,6 +193,39 @@ MonoBehaviour:
   rotationSpeed: 150
   invertY: 1
   invertX: 1
+--- !u!114 &203114397
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 203114393}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bebd3e3043224bb468d493b3ecf20daf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  movementThreshold: 1000
+  timeBeforeSceneChange: 3
+  nextSceneName: Secuence
+  showDebugInfo: 1
+--- !u!114 &203114398
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 203114393}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b4478acfd81135f4aa51a21b8e1c7d36, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  crossSectionMaterial: {fileID: 2100000, guid: faf758f509b282946bb83bbb5a7adcc0, type: 2}
+  separationForce: 5
+  destroyAfter: 0
+  destroyDelay: 3
+  preprocessSlices: 1
 --- !u!1001 &292435787
 PrefabInstance:
   m_ObjectHideFlags: 0
