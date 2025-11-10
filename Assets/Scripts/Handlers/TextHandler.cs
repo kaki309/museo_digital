@@ -31,5 +31,17 @@ public class TextHandler : MonoBehaviour
             Debug.LogWarning("No TextMeshProUGUI assigned. Cannot display text.");
         }
     }
+    
+    /// <summary>
+    /// Cleans/hides the text display
+    /// </summary>
+    public void Clean()
+    {
+        if (targetText != null)
+        {
+            targetText.gameObject.SetActive(false);
+            targetText.text = "";
+        }
+    }
 }
 

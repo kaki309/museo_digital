@@ -162,5 +162,17 @@ public class LaiaHandler : MonoBehaviour
             Debug.LogError($"Failed to load Laia image data from: {fullPath}");
         }
     }
+    
+    /// <summary>
+    /// Cleans/hides the Laia image
+    /// </summary>
+    public void Clean()
+    {
+        if (laiaImage != null)
+        {
+            laiaImage.gameObject.SetActive(false);
+            laiaImage.texture = null;
+        }
+    }
 }
 

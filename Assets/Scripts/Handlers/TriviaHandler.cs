@@ -23,12 +23,15 @@ public class TriviaHandler : MonoBehaviour
     private bool triviaAnswerSelected = false;
     private SequenceInstruction currentTriviaInstruction = null;
     
+    // Fragment tracking callback
+    private System.Action onFragmentFound;
+    
     /// <summary>
     /// Initialize the trivia handler with required components
     /// </summary>
     public void Initialize(GameObject canvas, TMPro.TextMeshProUGUI questionText, 
                            Button answer1Button, Button answer2Button, Button answer3Button,
-                           string correctAudio, string incorrectAudio)
+                           string correctAudio, string incorrectAudio, System.Action onFragmentFoundCallback = null)
     {
         triviaCanvas = canvas;
         triviaQuestionText = questionText;
@@ -37,6 +40,7 @@ public class TriviaHandler : MonoBehaviour
         triviaAnswer3Button = answer3Button;
         correctAnswerAudio = correctAudio;
         incorrectAnswerAudio = incorrectAudio;
+        onFragmentFound = onFragmentFoundCallback;
         
         // Initialize AudioSource from trivia canvas
         if (triviaCanvas != null)
@@ -104,6 +108,9 @@ public class TriviaHandler : MonoBehaviour
             PlayAudio(correctAnswerAudio);
             triviaAnswerSelected = true;
             isTriviaActive = false;
+            
+            // Notify that a fragment was found
+            onFragmentFound?.Invoke();
         }
         else
         {
@@ -203,7 +210,7 @@ public class TriviaHandler : MonoBehaviour
         }
         
         // Wait 2 seconds after correct answer is selected
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(3f);
         
         // Hide trivia canvas
         if (triviaCanvas != null)

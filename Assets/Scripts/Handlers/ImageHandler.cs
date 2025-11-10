@@ -94,5 +94,23 @@ public class ImageHandler : MonoBehaviour
             Debug.LogWarning("No image target assigned (RawImage or Image).");
         }
     }
+    
+    /// <summary>
+    /// Cleans/hides the image display
+    /// </summary>
+    public void Clean()
+    {
+        if (targetImage != null)
+        {
+            targetImage.gameObject.SetActive(false);
+            targetImage.texture = null;
+        }
+        
+        if (targetSpriteImage != null)
+        {
+            targetSpriteImage.gameObject.SetActive(false);
+            targetSpriteImage.sprite = null;
+        }
+    }
 }
 

@@ -41,6 +41,20 @@ public class SequenceManager : MonoBehaviour
     [Tooltip("Array of Transform positions where Laia can move. Index is 1-based (1 = first position, 2 = second, etc.)")]
     public Transform[] laiaPositions; // Predefined positions for Laia to move to
     
+    [Header("Fragment Settings")]
+    [Tooltip("Predefined GameObject in trivia canvas to show when a fragment is found")]
+    public GameObject fragmentObject;
+    [Tooltip("Duration in seconds to show the fragment")]
+    public float fragmentDisplayDuration = 2f;
+    
+    [Header("Finish Sequence Settings")]
+    [Tooltip("Audio file name for finish sequence (in StreamingAssets/audio/)")]
+    public string finishAudioName = "FinishNarrative";
+    [Tooltip("Laia image name for finish sequence (in StreamingAssets/System/LaiaImage/)")]
+    public string finishLaiaImageName = "LaiaHappy";
+    [Tooltip("Scene name to load after finish sequence")]
+    public string nextSceneName = "";
+    
     [Header("Sequence Control")]
     public bool playOnStart = false;
     public bool loopSequence = false;
@@ -51,6 +65,8 @@ public class SequenceManager : MonoBehaviour
     private TextHandler textHandler;
     private TriviaHandler triviaHandler;
     private LaiaHandler laiaHandler;
+    private FragmentDisplayHandler fragmentDisplayHandler;
+    private FinishSequenceHandler finishSequenceHandler;
     
     // List of parsed instructions
     private List<SequenceInstruction> instructions = new List<SequenceInstruction>();
@@ -95,16 +111,37 @@ public class SequenceManager : MonoBehaviour
         textHandler = gameObject.AddComponent<TextHandler>();
         textHandler.Initialize(targetText);
         
-        // Initialize TriviaHandler
+        // Initialize FragmentDisplayHandler (needed before TriviaHandler)
+        fragmentDisplayHandler = gameObject.AddComponent<FragmentDisplayHandler>();
+        fragmentDisplayHandler.Initialize(fragmentObject, fragmentDisplayDuration);
+        
+        // Initialize TriviaHandler with fragment callback (only for visual display)
         triviaHandler = gameObject.AddComponent<TriviaHandler>();
         triviaHandler.Initialize(triviaCanvas, triviaQuestionText, 
                                  triviaAnswer1Button, triviaAnswer2Button, triviaAnswer3Button,
-                                 correctAnswerAudio, incorrectAnswerAudio);
+                                 correctAnswerAudio, incorrectAnswerAudio,
+                                 OnFragmentFound);
         
         // Initialize LaiaHandler
         laiaHandler = gameObject.AddComponent<LaiaHandler>();
         laiaHandler.Initialize(laiaObject, laiaImage, laiaPositions);
         laiaHandler.InitializeImage(); // Initialize Laia image to LaiaHappy
+        
+        // Initialize FinishSequenceHandler
+        finishSequenceHandler = gameObject.AddComponent<FinishSequenceHandler>();
+        finishSequenceHandler.Initialize(audioHandler, imageHandler, textHandler, laiaHandler,
+                                        () => audioHandler != null && audioHandler.IsPlaying(),
+                                        () => audioHandler.WaitForAudioToFinish());
+        finishSequenceHandler.SetFinishConfig(finishAudioName, finishLaiaImageName, nextSceneName);
+    }
+    
+    /// <summary>
+    /// Called when a fragment is found (trivia answered correctly)
+    /// Only shows visual representation, no tracking
+    /// </summary>
+    private void OnFragmentFound()
+    {
+        fragmentDisplayHandler?.ShowFragment();
     }
     
     /// <summary>
@@ -248,16 +285,30 @@ public class SequenceManager : MonoBehaviour
             currentInstructionIndex++;
         }
         
-        // Sequence complete
-        isPlaying = false;
-        OnSequenceComplete?.Invoke();
-        
-        // Loop if enabled
-        if (loopSequence)
+        // Only proceed if we actually completed all instructions (not stopped early)
+        if (currentInstructionIndex >= instructions.Count && isPlaying)
         {
-            currentInstructionIndex = 0;
-            yield return new WaitForSeconds(1f); // Brief pause before looping
-            StartSequence();
+            // Sequence complete
+            isPlaying = false;
+            OnSequenceComplete?.Invoke();
+            
+            // Loop if enabled
+            if (loopSequence)
+            {
+                currentInstructionIndex = 0;
+                yield return new WaitForSeconds(1f); // Brief pause before looping
+                StartSequence();
+            }
+            else
+            {
+                // Start finish sequence only after all instructions are complete
+                yield return StartCoroutine(finishSequenceHandler.PlayFinishSequence());
+            }
+        }
+        else
+        {
+            // Sequence was stopped or paused, don't run finish sequence
+            isPlaying = false;
         }
     }
     
