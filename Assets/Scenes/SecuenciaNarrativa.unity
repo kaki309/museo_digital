@@ -850,7 +850,7 @@ MonoBehaviour:
   fragmentDisplayDuration: 2
   finishAudioName: Despedida
   finishLaiaImageName: LaiaHappy
-  nextSceneName: interfaz
+  nextSceneName: 3dEnvironment
   playOnStart: 1
   loopSequence: 0
 --- !u!4 &439258149

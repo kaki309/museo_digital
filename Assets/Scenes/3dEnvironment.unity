@@ -205,9 +205,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bebd3e3043224bb468d493b3ecf20daf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  movementThreshold: 1000
+  movementThreshold: 1500
   timeBeforeSceneChange: 3
-  nextSceneName: Secuence
+  nextSceneName: SecuenciaNarrativa
   showDebugInfo: 1
 --- !u!114 &203114398
 MonoBehaviour:

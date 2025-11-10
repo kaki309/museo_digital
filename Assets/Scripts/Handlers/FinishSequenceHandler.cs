@@ -71,7 +71,7 @@ public class FinishSequenceHandler : MonoBehaviour
         {
             // Load LaiaHappy from StreamingAssets/System/LaiaImage and display in main image component
             imageHandler.ShowImage($"System/LaiaImage/{finishLaiaImageName}");
-            yield return new WaitForSeconds(1f); // Brief pause to show Laia
+            yield return new WaitForSeconds(0.5f); // Brief pause to show Laia
         }
 
         // Step 3: Play finish audio
