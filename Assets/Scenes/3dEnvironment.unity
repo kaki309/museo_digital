@@ -222,7 +222,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   crossSectionMaterial: {fileID: 2100000, guid: faf758f509b282946bb83bbb5a7adcc0, type: 2}
-  separationForce: 5
+  separationForce: 8
   destroyAfter: 0
   destroyDelay: 3
   preprocessSlices: 1

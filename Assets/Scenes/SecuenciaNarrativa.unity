@@ -849,7 +849,7 @@ MonoBehaviour:
   fragmentObject: {fileID: 89527325}
   fragmentDisplayDuration: 2
   finishAudioName: Despedida
-  finishLaiaImageName: LaiaHappy
+  finishLaiaImageName: LaiaFeliz
   nextSceneName: 3dEnvironment
   playOnStart: 1
   loopSequence: 0
