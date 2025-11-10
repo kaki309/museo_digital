@@ -2,6 +2,7 @@
 
 Audio: System/noManipularPiezas
 LaiaImage: LaiaAsustada
+Wait: 9
 
 Audio: System/reconstruirPieza
 LaiaImage: LaiaFeliz

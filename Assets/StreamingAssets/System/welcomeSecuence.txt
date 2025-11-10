@@ -1,7 +1,9 @@
 # Secuencia de bienvenida cuando carga el modelo 3D
 
+Wait: 1
 Audio: System/bienvenida
 LaiaImage: LaiaEntusiasmada
+Wait: 6
 
 Audio: System/usoControles
 LaiaImage: LaiaFeliz
