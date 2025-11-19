@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using System.IO;
@@ -66,8 +66,16 @@ public class TriviaHandler : MonoBehaviour
         {
             triviaCanvas.SetActive(false);
         }
+        // Inicializar lista de botones automáticamente
+        answerButtons = new Button[] { triviaAnswer1Button, triviaAnswer2Button, triviaAnswer3Button };
+
+        // Resaltar el primero al iniciar
+        HighlightAnswer(0);
+
+
+
     }
-    
+
     /// <summary>
     /// Sets up button listeners for trivia answers
     /// </summary>
@@ -376,5 +384,79 @@ public class TriviaHandler : MonoBehaviour
         currentTriviaInstruction = null;
         triviaAnswerSelected = false;
     }
+    // -------------------------
+    // VARIABLES PARA JOYSTICK
+    // -------------------------
+    private int selectedIndex = 0;
+    private Button[] answerButtons;
+    private Button currentSelectedAnswerButton;
+
+    // Saber si la trivia está activa 
+    public bool IsTriviaActive()
+    {
+        // Más robusto: pregunta directamente al canvas
+        return triviaCanvas != null && triviaCanvas.activeSelf;
+    }
+
+    // Ir a la opción siguiente (abajo)
+    public void SelectNextAnswer()
+    {
+        ChangeAnswerSelection(1);
+    }
+
+    // Ir a la opción anterior (arriba)
+    public void SelectPreviousAnswer()
+    {
+        ChangeAnswerSelection(-1);
+    }
+
+    // Confirmar respuesta (BOTÓN físico)
+    public void SubmitAnswer()
+    {
+        // ⚠ FORZAR LA RESPUESTA CORRECTA MIENTRAS PROBAMOS
+        //currentTriviaInstruction.correctAnswerIndex = selectedIndex;
+
+        if (currentSelectedAnswerButton != null)
+        {
+            currentSelectedAnswerButton.onClick.Invoke(); // Simula clic real
+        }
+    }
+
+    //----------------------------------
+    // LÓGICA INTERNA DE CAMBIO DE OPCIÓN
+    //----------------------------------
+    private void ChangeAnswerSelection(int direction)
+    {
+        selectedIndex += direction;
+
+        // Evitar salirse del rango de botones
+        if (selectedIndex < 0) selectedIndex = answerButtons.Length - 1;
+        if (selectedIndex >= answerButtons.Length) selectedIndex = 0;
+
+        HighlightAnswer(selectedIndex);
+    }
+
+    //----------------------------------
+    // RESALTAR VISUALMENTE EL BOTÓN SELECCIONADO
+    //----------------------------------
+    private void HighlightAnswer(int index)
+    {
+        currentSelectedAnswerButton = answerButtons[index];
+
+        // Resetear colores de todos los botones
+        foreach (var btn in answerButtons)
+        {
+            ColorBlock colors = btn.colors;
+            colors.normalColor = Color.white;
+            btn.colors = colors;
+        }
+
+        // Marcar el actual en amarillo
+        ColorBlock selectedColors = currentSelectedAnswerButton.colors;
+        selectedColors.normalColor = Color.yellow;
+        currentSelectedAnswerButton.colors = selectedColors;
+    }
+
+
 }
 

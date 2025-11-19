@@ -56,13 +56,13 @@ public class ArduinoConnector : MonoBehaviour
         StartCoroutine(AutoSearchLoop());
     }
 
-    // void Update()
-    // {
-    //     foreach(string key in internalData.Keys)
-    //     {
-    //         Debug.Log(key + internalData[key]);
-    //     }
-    // }
+    void Update()
+    {
+        //foreach (string key in internalData.Keys)
+        //{
+        //    Debug.Log(key + internalData[key]);
+        //}
+    }
 
     // ---------------------------------------------------------------
     // AUTOSEARCH LOOP – busca continuamente hasta encontrar Arduino
