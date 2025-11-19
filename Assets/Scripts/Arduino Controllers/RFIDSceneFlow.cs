@@ -1,13 +1,15 @@
 using UnityEngine;
 using System.IO;
+using System.Collections;
 using UnityEngine.SceneManagement;
+using System.Threading.Tasks;
 
 public class RFIDSceneFlow : MonoBehaviour
 {
     [Header("Canvas References")]
-    public Canvas canvas1;   // activo por defecto
-    public Canvas canvas2;   // se activa cuando encuentra la carpeta
-    public Canvas canvas3;   // se activa después de 5 segundos
+    public GameObject canvas1;   // activo por defecto
+    public GameObject canvas2;   // se activa cuando encuentra la carpeta
+    public GameObject canvas3;   // se activa después de 5 segundos
 
     [Header("Target Scene")]
     public string sceneToLoad = "NuevaEscena";
@@ -18,9 +20,9 @@ public class RFIDSceneFlow : MonoBehaviour
     void Start()
     {
         // Asegura que solo canvas1 está activo
-        canvas1.gameObject.SetActive(true);
-        canvas2.gameObject.SetActive(false);
-        canvas3.gameObject.SetActive(false);
+        canvas1.SetActive(true);
+        canvas2.SetActive(false);
+        canvas3.SetActive(false);
     }
 
     void Update()
@@ -49,7 +51,7 @@ public class RFIDSceneFlow : MonoBehaviour
         if (Directory.Exists(folderPath))
         {
             Debug.Log($"Carpeta encontrada para RFID: {currentRFID}");
-            StartCoroutine(RFIDFlow());
+            StartCoroutine(RFIDFlow(currentRFID));
             flowStarted = true; // evita que se ejecute más de una vez
         }
         else
@@ -58,29 +60,22 @@ public class RFIDSceneFlow : MonoBehaviour
         }
     }
 
-    private System.Collections.IEnumerator RFIDFlow()
+    private IEnumerator RFIDFlow(string rfid)
     {
         // Activar canvas 2
-        canvas1.gameObject.SetActive(false);
-        canvas2.gameObject.SetActive(true);
-
-        // Esperar 3.5 segundos
+        canvas1.SetActive(false);
+        canvas2.SetActive(true);
         yield return new WaitForSeconds(3.5f);
 
         // Activar canvas 3
-        canvas2.gameObject.SetActive(false);
-        canvas3.gameObject.SetActive(true);
-
-        // Esperar 2 segundos
+        canvas2.SetActive(false);
+        canvas3.SetActive(true);
         yield return new WaitForSeconds(2f);
 
-        // Iniciar carga asincrónica de la escena
+        // Cargar la escena de manera asincrónica pero sin activarla todavía
         AsyncOperation op = SceneManager.LoadSceneAsync(sceneToLoad);
+        op.allowSceneActivation = true;
 
-        // Esperar hasta que termine
-        while (!op.isDone)
-        {
-            yield return null;
-        }
+        while (!op.isDone) yield return null;
     }
 }

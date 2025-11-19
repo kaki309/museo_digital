@@ -3,6 +3,7 @@ using System.IO.Ports;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Deployment.Internal;
 
 [Serializable]
 public class Payload {
@@ -10,7 +11,6 @@ public class Payload {
     public string JOYSTICK;
     public string POT;
     public string BUTTON;
-
 }
 
 public class ArduinoConnector : MonoBehaviour
@@ -27,13 +27,13 @@ public class ArduinoConnector : MonoBehaviour
 
     private const string IDENTIFICATION_MSG = "Museo Digital";
     private const string RESPONSE_MSG = "Te encontre";
+    private const string RESET_CONNECTION_MSG = "Reset Connection";
 
     // ---- Diccionario protegido ----
     private Dictionary<string, string> internalData = new Dictionary<string, string>()
     {
         { "RFID", null },
         { "JOYSTICK", null },
-        {"ZOOM", null},
         { "POT", null },
         { "BUTTON", null }
     };
@@ -201,7 +201,17 @@ public class ArduinoConnector : MonoBehaviour
     {
         if (serial != null)
         {
-            try { serial.Close(); } catch { }
+            try
+            {
+                // Enviar mensaje antes de cerrar
+                serial.WriteLine(RESET_CONNECTION_MSG);
+                serial.BaseStream.Flush(); // asegurarse que se envíe
+                serial.Close();
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning("Error enviando mensaje en cierre: " + e.Message);
+            }
             serial = null;
         }
     }

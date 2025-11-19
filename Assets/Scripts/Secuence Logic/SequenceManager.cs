@@ -13,7 +13,7 @@ public class SequenceManager : MonoBehaviour
     [Header("Directly initialize secuence")]
     [Tooltip("Turn on only if is needed to ignore the RFID lecture and start a secuence directly")]
     public bool initializeSecuenceDirectly = false;
-    public string sequenceFileName = "secuence";
+    public string sequenceFileName;
 
     [Header("Audio Settings")]
     public AudioSource audioSource;
