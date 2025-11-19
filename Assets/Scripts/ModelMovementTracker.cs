@@ -220,6 +220,7 @@ public class ModelMovementTracker : MonoBehaviour
         isBeginningSequencePlaying = true;
 
         // Configurar la secuencia de bienvenida
+        sequenceManager.initializeSecuenceDirectly = true;
         sequenceManager.sequenceFileName = beginningSequenceFileName;
         sequenceManager.nextSceneName = ""; // No cambiar de escena después de la secuencia de bienvenida
         sequenceManager.loopSequence = false; // No repetir la secuencia de bienvenida
@@ -266,7 +267,7 @@ public class ModelMovementTracker : MonoBehaviour
         
         if (showDebugInfo)
         {
-            Debug.Log($"Secuencia de split completada. Cambiando a la escena: {sequenceCompleteSceneName}");
+            Debug.Log($"Secuencia de split completada");
         }
         
         // Cambiar de escena

@@ -10,10 +10,11 @@ using System.IO;
 /// </summary>
 public class SequenceManager : MonoBehaviour
 {
-    [Header("Sequence File")]
-    [Tooltip("Name of the .txt file in StreamingAssets folder (without .txt extension)")]
-    public string sequenceFileName = "sequence";
-    
+    [Header("Directly initialize secuence")]
+    [Tooltip("Turn on only if is needed to ignore the RFID lecture and start a secuence directly")]
+    public bool initializeSecuenceDirectly = false;
+    public string sequenceFileName = "secuence";
+
     [Header("Audio Settings")]
     public AudioSource audioSource;
     
@@ -58,6 +59,9 @@ public class SequenceManager : MonoBehaviour
     [Header("Sequence Control")]
     public bool playOnStart = false;
     public bool loopSequence = false;
+    
+    // Base Folder for the scanned RFID
+    public string folderNameForCurrentRFID {get; private set;}
     
     // Handler components
     private AudioHandler audioHandler;
@@ -149,9 +153,20 @@ public class SequenceManager : MonoBehaviour
     /// </summary>
     public void LoadSequence()
     {
+        if (ArduinoConnector.Instance)
+        folderNameForCurrentRFID = ArduinoConnector.Instance.Data["RFID"];
+
         instructions.Clear();
         
-        string filePath = Path.Combine(Application.streamingAssetsPath, sequenceFileName + ".txt");
+        string filePath;
+        if (initializeSecuenceDirectly)
+        {
+            filePath = Path.Combine(Application.streamingAssetsPath, sequenceFileName + ".txt");
+        }else
+        {
+            filePath = Path.Combine(Application.streamingAssetsPath, folderNameForCurrentRFID + "/secuence.txt");
+        }
+        
         
         // Check if file exists
         if (!File.Exists(filePath))
@@ -172,6 +187,11 @@ public class SequenceManager : MonoBehaviour
             // Only add valid instructions (skip empty lines and comments)
             if (instruction.type != InstructionType.Unknown)
             {
+                if (!initializeSecuenceDirectly)
+                {
+                    string modifiedResourcePath = Path.Combine(Application.streamingAssetsPath, folderNameForCurrentRFID + "/" + instruction.resourcePath);
+                    instruction.resourcePath = modifiedResourcePath;
+                }
                 instructions.Add(instruction);
             }
         }

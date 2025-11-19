@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using System.IO;
 using TMPro;
 
 /// <summary>
@@ -302,7 +303,7 @@ public class TriviaHandler : MonoBehaviour
     /// </summary>
     private IEnumerator LoadAndPlayAudio(string audioFileName)
     {
-        string systemPath = System.IO.Path.Combine(Application.streamingAssetsPath, "System", audioFileName);
+        string systemPath = Path.Combine(Application.streamingAssetsPath, "System", audioFileName);
         string fullPath = "";
         AudioType audioType = AudioType.WAV;
         

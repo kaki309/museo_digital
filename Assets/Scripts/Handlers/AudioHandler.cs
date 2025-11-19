@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using System.IO;
 
 /// <summary>
 /// Handles audio playback for the sequence manager
@@ -59,7 +60,7 @@ public class AudioHandler : MonoBehaviour
             Debug.LogWarning($"Audio clip not found in Resources: {resourcePath}");
             Debug.LogWarning("Trying to load from StreamingAssets...");
             
-            string basePath = System.IO.Path.Combine(Application.streamingAssetsPath, resourcePath);
+            string basePath = Path.Combine(Application.streamingAssetsPath, resourcePath);
             string fullPath = "";
             AudioType audioType = AudioType.WAV;
             
@@ -71,7 +72,7 @@ public class AudioHandler : MonoBehaviour
             for (int i = 0; i < extensions.Length; i++)
             {
                 fullPath = basePath + extensions[i];
-                if (System.IO.File.Exists(fullPath))
+                if (File.Exists(fullPath))
                 {
                     audioType = audioTypes[i];
                     fileFound = true;

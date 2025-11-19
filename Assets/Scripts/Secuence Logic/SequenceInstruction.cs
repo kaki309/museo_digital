@@ -186,9 +186,6 @@ public class SequenceInstruction
     
     private string ProcessResourcePath(string path)
     {
-        // Process {this.file.route} placeholder if present
-        // For now, we'll just remove it or replace it
-        // You can customize this based on your needs
         path = path.Replace("{this.file.route}/", "");
         path = path.Replace("{this.file.route}", "");
         
